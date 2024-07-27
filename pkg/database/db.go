@@ -1,0 +1,73 @@
+package database
+
+import (
+	"fmt"
+	"fx-golang-server/config"
+
+	"github.com/rs/zerolog/log"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+
+	"gorm.io/gorm/schema"
+)
+
+func PostgresqlDatabaseProvider(cnf *config.Config) *gorm.DB {
+	db, err := NewPostgresqlDatabase(cnf.Database)
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot connect to db")
+	}
+	return db
+}
+
+func NewPostgresqlDatabase(databaseCnf config.DatabaseConfig) (*gorm.DB, error) {
+	dsn := GetDatabaseDSN(databaseCnf)
+	// newLogger := logger.New(
+	// 	log.New(os.Stdout, "\r\n", log.LstdFlags), // Sử dụng log.New để tạo logger mới
+	// 	logger.Config{
+	// 		SlowThreshold:             200,         // Định nghĩa thời gian tối thiểu để log câu truy vấn là câu truy vấn chậm
+	// 		LogLevel:                  logger.Info, // Đặt log level là logger.Info để ghi log câu truy vấn SQL
+	// 		IgnoreRecordNotFoundError: true,        // Bỏ qua lỗi Record Not Found
+	// 		Colorful:                  true,        // Sử dụng màu sắc cho log
+	// 	},
+	// )
+	// customLogger := NewCustomLogger(dbLoggerConfig{
+	// 	ignoreRecordNotFoundError: false,
+	// })
+	// customLogger.logLevel = logger.Info
+	client, err := gorm.Open(postgres.New(
+		postgres.Config{
+			DSN:                  dsn,
+			PreferSimpleProtocol: true, // disables implicit prepared statement usage. By default pgx automatically uses the extended protocol
+		},
+	), &gorm.Config{
+		// Logger: customLogger,
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix:   fmt.Sprintf("%s.", databaseCnf.Schema),
+			SingularTable: true,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	_, err = client.DB()
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+func GetDatabaseDSN(DBConf config.DatabaseConfig) string {
+	dsn := fmt.Sprintf(
+		"host=%s port=%s user=%s dbname=%s TimeZone=%s",
+		DBConf.Host, DBConf.Port, DBConf.Username, DBConf.DatabaseName, "UTC",
+	)
+
+	if DBConf.SSLMode != "" {
+		dsn += fmt.Sprintf(" sslmode=%s", DBConf.SSLMode)
+	}
+
+	if DBConf.Password != "" {
+		dsn += fmt.Sprintf(" password=%s", DBConf.Password)
+	}
+	return dsn
+}

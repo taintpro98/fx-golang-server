@@ -1,0 +1,74 @@
+enable_swagger: true
+
+app_info:
+  environment: development
+  api_port: :8080
+  websocket_port: :8081
+
+database:
+  schema: public
+  host: localhost
+  port: 5433
+  username: root
+  password: 123456
+  database_name: golang-database
+
+mongo:
+  host: localhost
+  port: 27017
+  username: root
+  password: 123456
+  database_name: golang-database
+
+redis:
+  host: localhost
+  port: 6380
+  prefix: golang-server
+  # username: root
+  password: 123456
+  db: 0
+
+redis_queue:
+  host: localhost
+  port: 6380
+  prefix: golang-server
+  username: root
+  password: 123456
+  db: 1
+
+kafka:
+  uri: localhost:9092
+  consumer: loyalty.event_dispatcher.consumer
+  partitioner: "random"
+  topic:
+    order_service_result: order-service.order-status
+    account_service_user_profile_created: account-service.user.profile.created
+  sasl:
+    consumer_user: ride-sharing-msk-staging
+    consumer_password: jdbO8q95ES0B
+
+telegram_bot:
+  token: abc
+  chat_id: 123
+
+token:
+  priviate_key_path: cert/private.key
+  public_key_path: cert/public.key
+  access_token_duration: 3000h
+  refresh_token_duration: 4000h
+  admin_access_token_duration: 24h
+  admin_refresh_token_duration: 48h
+  emddi_secret_key: ASDHASJDKHASDKj
+  cache_in_mem: true
+  forever_token_roles:
+    - partner
+    - green_portal
+    - biz_portal
+    - partner_hub
+    - partner_triplayz
+
+elastic:
+  addresses: http://localhost:9200
+  username: app_service
+  password: 0j@HlOUlcwBS
+  supplier_setting_index: supplier_setting
