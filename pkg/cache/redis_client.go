@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func RedisClientProvider(cnf config.Config) IRedisClient {
+func RedisClientProvider(cnf *config.Config) IRedisClient {
 	client, err := NewRedisClient(cnf.Redis)
 	if err != nil {
 		log.Fatal().Err(err).Msg("connect to redis error")
@@ -21,6 +21,7 @@ func RedisClientProvider(cnf config.Config) IRedisClient {
 }
 
 type IRedisClient interface {
+	CloseConnection() error
 	Get(ctx context.Context, key string, outputType interface{}) error
 	Set(ctx context.Context, key string, value interface{}, ttl int64) error // interface is not a pointer
 
@@ -59,6 +60,10 @@ func NewRedisClient(cfg config.RedisConfig) (IRedisClient, error) {
 
 func (c *redisClient) generateKey(key string) string {
 	return fmt.Sprintf("%s:%s", c.cfg.Prefix, key)
+}
+
+func (c *redisClient) CloseConnection() error {
+	return c.client.Close()
 }
 
 func (c *redisClient) Get(ctx context.Context, key string, outputType interface{}) error {

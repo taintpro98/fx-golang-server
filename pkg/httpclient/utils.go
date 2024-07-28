@@ -2,8 +2,10 @@ package httpclient
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
+	"time"
 )
 
 func CloneRequest(r *http.Request) (*http.Request, error) {
@@ -32,6 +34,15 @@ func CloneRequest(r *http.Request) (*http.Request, error) {
 		r.Body = io.NopCloser(bytes.NewReader(buf.Bytes()))
 		clone.Body = io.NopCloser(bytes.NewReader(buf.Bytes()))
 	}
-
 	return clone, nil
+}
+
+func LogInfoRequest(ctx context.Context,
+	end time.Duration,
+	req http.Request,
+	res http.Response,
+	body []byte,
+	err error,
+) {
+
 }

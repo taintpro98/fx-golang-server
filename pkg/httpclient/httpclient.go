@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang-server/pkg/constants"
-	"golang-server/pkg/e"
-	"golang-server/pkg/logger"
+	"fx-golang-server/pkg/constants"
+	"fx-golang-server/pkg/e"
 
 	"io"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 type CallbackFunc func(body []byte) error
@@ -47,14 +48,14 @@ func (c HttpClient) DoRequest(ctx context.Context, param DoRequestParam, output 
 
 	reqClone, err := CloneRequest(param.Request)
 	if err != nil {
-		logger.Error(ctx, err, "clone request error")
+		log.Error().Ctx(ctx).Err(err).Msg("clone request error")
 	}
 	start := time.Now()
 	res, err := c.Client.Do(param.Request)
 	end := time.Since(start)
 
 	if err != nil {
-		logger.LogInfoRequest(ctx, end, *reqClone, http.Response{}, nil, nil)
+		LogInfoRequest(ctx, end, *reqClone, http.Response{}, nil, nil)
 		if backupOutput != nil {
 			tmp := err.Error()
 			*backupOutput = tmp
@@ -67,7 +68,7 @@ func (c HttpClient) DoRequest(ctx context.Context, param DoRequestParam, output 
 		return err
 	}
 	if res == nil {
-		logger.LogInfoRequest(ctx, end, *reqClone, http.Response{}, nil, nil)
+		LogInfoRequest(ctx, end, *reqClone, http.Response{}, nil, nil)
 		if backupOutput != nil {
 			*backupOutput = e.ErrNilResponse.Msg
 		}
@@ -76,14 +77,14 @@ func (c HttpClient) DoRequest(ctx context.Context, param DoRequestParam, output 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			logger.Error(ctx, err, "close body error")
+			log.Error().Ctx(ctx).Err(err).Msg("close body error")
 		}
 	}(res.Body)
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
-	logger.LogInfoRequest(ctx, end, *reqClone, *res, body, err)
+	LogInfoRequest(ctx, end, *reqClone, *res, body, err)
 	if backupOutput != nil {
 		tmp := string(body)
 		*backupOutput = tmp
@@ -104,7 +105,7 @@ func (c HttpClient) DoRequest(ctx context.Context, param DoRequestParam, output 
 	}
 	if output != nil {
 		if err := json.Unmarshal(body, output); err != nil {
-			logger.Error(ctx, err, "unmarshal response body error")
+			log.Error().Ctx(ctx).Err(err).Msg("unmarshal response body error")
 			return err
 		}
 	}

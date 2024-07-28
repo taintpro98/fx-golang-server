@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"fx-golang-server/module/core/dto"
 )
 
 type Transport struct {
@@ -29,7 +30,13 @@ func HandleHealthCheck(ctx *gin.Context) {
 }
 
 func (t *Transport) Register(ctx *gin.Context) {
-
+	var data dto.CreateUserRequest
+	if err := ctx.ShouldBindJSON(&data); err != nil {
+		dto.HandleResponse(ctx, data, err)
+		return
+	}
+	result, err := t.authBiz.Register(ctx, data)
+	dto.HandleResponse(ctx, result, err)
 }
 
 func (t *Transport) Login(ctx *gin.Context) {
