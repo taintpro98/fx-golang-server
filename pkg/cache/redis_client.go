@@ -27,6 +27,9 @@ type IRedisClient interface {
 
 	Publish(ctx context.Context, channel string, value interface{}) error // value is not a pointer
 	Subscribe(ctx context.Context, channel string) *redis.PubSub
+
+	RPush(ctx context.Context, queueName string, value interface{}) error // value is not a pointer
+	LPop(ctx context.Context, queueName string, outputType interface{}) error // value is a pointer
 }
 
 type redisClient struct {
@@ -96,4 +99,19 @@ func (c *redisClient) Publish(ctx context.Context, channel string, value interfa
 
 func (c *redisClient) Subscribe(ctx context.Context, channel string) *redis.PubSub {
 	return c.client.Subscribe(ctx, channel)
+}
+
+func (c *redisClient) LPop(ctx context.Context, queueName string, outputType interface{}) error {
+	item, err := c.client.LPop(ctx, queueName).Result()
+	if err != nil {
+		return err
+	}
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal([]byte(item), &outputType)
+}
+
+func (c *redisClient) RPush(ctx context.Context, queueName string, value interface{}) error {
+	return c.client.RPush(ctx, queueName, value).Err()
 }
