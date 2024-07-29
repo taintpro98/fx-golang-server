@@ -1,2 +1,4 @@
 ## Initialization
-- go mod init fx-golang-server
+```
+go mod init fx-golang-server
+```

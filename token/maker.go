@@ -41,14 +41,14 @@ func NewJWTMaker(cfg *config.Config) (IJWTMaker, error) {
 	if err != nil {
 		log.Fatal().Err(err).Msg("parse public key error")
 	}
-	return jwtMaker{
+	return &jwtMaker{
 		privateKey: priKey,
 		publicKey:  pubKey,
 	}, nil
 }
 
 // CreateToken implements IJWTMaker.
-func (j jwtMaker) CreateToken(ctx context.Context, payload interface{}) (string, error) {
+func (j *jwtMaker) CreateToken(ctx context.Context, payload interface{}) (string, error) {
 	// Create a new JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, payload.(jwt.Claims))
 
@@ -62,14 +62,14 @@ func (j jwtMaker) CreateToken(ctx context.Context, payload interface{}) (string,
 }
 
 // VerifyToken implements IJWTMaker.
-func (j jwtMaker) VerifyToken(ctx context.Context, tokenString string) (interface{}, error) {
+func (j *jwtMaker) VerifyToken(ctx context.Context, tokenString string) (interface{}, error) {
 	// Parse the token
 	token, err := jwt.ParseWithClaims(tokenString, &dto.UserPayload{}, func(token *jwt.Token) (interface{}, error) {
 		return j.publicKey, nil
 	})
 
 	if err != nil {
-		log.Fatal().Ctx(ctx).Err(err).Msg("Failed to parse JWT token:")
+		log.Error().Ctx(ctx).Err(err).Msg("Failed to parse JWT token:")
 		return nil, err
 	}
 

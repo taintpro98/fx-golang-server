@@ -4,5 +4,5 @@ import "go.uber.org/fx"
 
 var RepositoryModule = fx.Module(
 	"repository",
-	fx.Provide(NewUserRepository),
+	fx.Provide(NewUserRepository, NewMovieRepository),
 )

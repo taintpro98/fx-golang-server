@@ -10,7 +10,8 @@ type CreateUserResponse struct {
 }
 
 type UserPayload struct {
-	UserID string `json:"user_id"`
+	Sub string `json:"sub"`
+	Exp int64  `json:"exp"` // seconds
 }
 
 func (uc UserPayload) Valid() error {

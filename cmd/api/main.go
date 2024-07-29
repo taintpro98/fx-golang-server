@@ -41,7 +41,7 @@ var ConnectionModule = fx.Module(
 	fx.Invoke(handleConnection),
 )
 
-func NewGinEngine(trpt *transport.Transport) *gin.Engine {
+func NewGinEngine(trpt *transport.Transport, jwtMaker token.IJWTMaker) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	engine.Use(
@@ -49,7 +49,7 @@ func NewGinEngine(trpt *transport.Transport) *gin.Engine {
 	)
 
 	route.RegisterHealthCheckRoute(engine)
-	route.RegisterRoutes(engine, trpt)
+	route.RegisterRoutes(engine, trpt, jwtMaker)
 	return engine
 }
 
