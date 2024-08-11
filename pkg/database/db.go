@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
@@ -21,26 +22,17 @@ func PostgresqlDatabaseProvider(cnf *config.Config) *gorm.DB {
 
 func NewPostgresqlDatabase(databaseCnf config.DatabaseConfig) (*gorm.DB, error) {
 	dsn := GetDatabaseDSN(databaseCnf)
-	// newLogger := logger.New(
-	// 	log.New(os.Stdout, "\r\n", log.LstdFlags), // Sử dụng log.New để tạo logger mới
-	// 	logger.Config{
-	// 		SlowThreshold:             200,         // Định nghĩa thời gian tối thiểu để log câu truy vấn là câu truy vấn chậm
-	// 		LogLevel:                  logger.Info, // Đặt log level là logger.Info để ghi log câu truy vấn SQL
-	// 		IgnoreRecordNotFoundError: true,        // Bỏ qua lỗi Record Not Found
-	// 		Colorful:                  true,        // Sử dụng màu sắc cho log
-	// 	},
-	// )
-	// customLogger := NewCustomLogger(dbLoggerConfig{
-	// 	ignoreRecordNotFoundError: false,
-	// })
-	// customLogger.logLevel = logger.Info
+	customLogger := NewCustomLogger(dbLoggerConfig{
+		ignoreRecordNotFoundError: false,
+	})
+	customLogger.logLevel = logger.Info
 	client, err := gorm.Open(postgres.New(
 		postgres.Config{
 			DSN:                  dsn,
 			PreferSimpleProtocol: true, // disables implicit prepared statement usage. By default pgx automatically uses the extended protocol
 		},
 	), &gorm.Config{
-		// Logger: customLogger,
+		Logger: customLogger,
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   fmt.Sprintf("%s.", databaseCnf.Schema),
 			SingularTable: true,

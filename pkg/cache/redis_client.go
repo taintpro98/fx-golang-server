@@ -106,9 +106,6 @@ func (c *redisClient) LPop(ctx context.Context, queueName string, outputType int
 	if err != nil {
 		return err
 	}
-	if err != nil {
-		return err
-	}
 	return json.Unmarshal([]byte(item), &outputType)
 }
 

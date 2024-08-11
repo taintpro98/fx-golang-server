@@ -42,7 +42,7 @@ func (t authenticateBiz) Register(ctx context.Context, data dto.CreateUserReques
 	}
 
 	tokenString, err := t.jwtMaker.CreateToken(ctx, dto.UserPayload{
-		UserID: dataInsert.ID,
+		Sub: dataInsert.ID,
 	})
 	if err != nil {
 		log.Error().Ctx(ctx).Err(err).Msg("create token error")

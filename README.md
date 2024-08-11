@@ -1,7 +1,7 @@
 ## Initialization
-
-- go mod init fx-golang-server
-
+```bash
+go mod init fx-golang-server
+```
 ## Containerization
 
 ```bash
