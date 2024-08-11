@@ -14,7 +14,7 @@ import (
 func PostgresqlDatabaseProvider(cnf *config.Config) *gorm.DB {
 	db, err := NewPostgresqlDatabase(cnf.Database)
 	if err != nil {
-		log.Fatal().Err(err).Msg("cannot connect to db")
+		log.Error().Err(err).Msg("cannot connect to db")
 	}
 	return db
 }

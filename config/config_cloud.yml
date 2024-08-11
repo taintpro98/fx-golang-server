@@ -1,0 +1,18 @@
+enable_swagger: true
+
+app_info:
+  environment: cloud
+  api_port: :8080
+  websocket_port: :8081
+
+database:
+  schema: public
+  host: localhost
+  port: 5433
+  username: root
+  password: 123456
+  database_name: golang-database
+
+telegram_bot:
+  token: abc
+  chat_id: 123

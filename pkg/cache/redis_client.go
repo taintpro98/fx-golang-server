@@ -15,7 +15,7 @@ import (
 func RedisClientProvider(cnf *config.Config) IRedisClient {
 	client, err := NewRedisClient(cnf.Redis)
 	if err != nil {
-		log.Fatal().Err(err).Msg("connect to redis error")
+		log.Error().Err(err).Msg("connect to redis error")
 	}
 	return client
 }

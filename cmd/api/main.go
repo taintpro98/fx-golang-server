@@ -11,6 +11,7 @@ import (
 	"fx-golang-server/module/core/transport"
 	"fx-golang-server/pkg/cache"
 	"fx-golang-server/pkg/database"
+	"fx-golang-server/pkg/telegram"
 	"fx-golang-server/pkg/tracing"
 	"fx-golang-server/route"
 	"fx-golang-server/token"
@@ -26,7 +27,9 @@ func handleConnection(lc fx.Lifecycle, redisClient cache.IRedisClient) {
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
 			log.Info().Ctx(ctx).Msg("Closing connection...")
-			redisClient.CloseConnection()
+			if redisClient != nil {
+				redisClient.CloseConnection()
+			}
 			return nil
 		},
 	})
@@ -37,6 +40,7 @@ var ConnectionModule = fx.Module(
 	fx.Provide(
 		database.PostgresqlDatabaseProvider,
 		cache.RedisClientProvider,
+		telegram.TelegramBotProvider,
 	),
 	fx.Invoke(handleConnection),
 )
@@ -53,7 +57,7 @@ func NewGinEngine(trpt *transport.Transport) *gin.Engine {
 	return engine
 }
 
-func startHttp(lc fx.Lifecycle, cnf *config.Config, engine *gin.Engine) {
+func startHttp(lc fx.Lifecycle, cnf *config.Config, engine *gin.Engine, telegramBot telegram.ITelegramBot) {
 	server := http.Server{
 		Addr:    cnf.AppInfo.ApiPort,
 		Handler: engine,
@@ -61,6 +65,10 @@ func startHttp(lc fx.Lifecycle, cnf *config.Config, engine *gin.Engine) {
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
+			if telegramBot != nil {
+				go telegramBot.GetMessages(ctx)
+			}
+
 			go func() {
 				log.Info().Ctx(ctx).Msg(fmt.Sprintf("Running API on port %s...", cnf.AppInfo.ApiPort))
 				tracing.InitLogger("api-service")

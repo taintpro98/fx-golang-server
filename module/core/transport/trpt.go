@@ -1,12 +1,12 @@
 package transport
 
 import (
-	"fmt"
 	"fx-golang-server/module/core/business"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"fx-golang-server/module/core/dto"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Transport struct {
@@ -16,7 +16,6 @@ type Transport struct {
 func NewTransport(
 	authBiz business.IAuthenticateBiz,
 ) *Transport {
-	fmt.Print("transport", authBiz)
 	return &Transport{
 		authBiz: authBiz,
 	}

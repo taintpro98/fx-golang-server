@@ -6,11 +6,14 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/inhies/go-bytesize"
+	"github.com/joho/godotenv"
 	"github.com/mitchellh/mapstructure"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
@@ -181,6 +184,20 @@ func loadConfigByUrl(v *viper.Viper, configURL string) {
 	}
 }
 
+func loadCloudConfig(config *Config) error {
+	err := godotenv.Load()
+	if err != nil {
+		log.Warn().Err(err).Msg("No .env file")
+	}
+	config.TelegramBot.Token = os.Getenv("TELEGRAM_TOKEN")
+	chatID := os.Getenv("TELEGRAM_CHAT_ID")
+	config.TelegramBot.ChatID, err = strconv.ParseInt(chatID, 10, 64)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func Init() (config Config) {
 	envi := flag.String("e", "", "Environment option")
 	flag.Parse()
@@ -208,6 +225,13 @@ func Init() (config Config) {
 	// log.Logger = zerolog.New(os.Stderr).With().Timestamp().Logger().With().Caller().Logger().Hook(tracing.TracingHook{}).Level(zerolog.DebugLevel)
 	if err != nil { // Handle errors reading the config file
 		panic(fmt.Errorf("fatal error config file: %s", err))
+	}
+
+	if config.AppInfo.Environment == "cloud" {
+		err = loadCloudConfig(&config)
+		if err != nil {
+			log.Error().Err(err).Msg("load cloud environments error")
+		}
 	}
 	return
 }

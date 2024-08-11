@@ -26,20 +26,20 @@ func NewJWTMaker(cfg *config.Config) (IJWTMaker, error) {
 	cnf := cfg.Token
 	privateKeyFile, err := os.ReadFile(cnf.PrivateKeyPath)
 	if err != nil {
-		log.Fatal().Err(err).Msg("get private key error")
+		log.Error().Err(err).Msg("get private key error")
 	}
 	priKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyFile)
 	if err != nil {
-		log.Fatal().Err(err).Msg("parse private key error")
+		log.Error().Err(err).Msg("parse private key error")
 	}
 
 	publicKeyFile, err := os.ReadFile(cnf.PublicKeyPath)
 	if err != nil {
-		log.Fatal().Err(err).Msg("get public key error")
+		log.Error().Err(err).Msg("get public key error")
 	}
 	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyFile)
 	if err != nil {
-		log.Fatal().Err(err).Msg("parse public key error")
+		log.Error().Err(err).Msg("parse public key error")
 	}
 	return jwtMaker{
 		privateKey: priKey,
@@ -69,7 +69,7 @@ func (j jwtMaker) VerifyToken(ctx context.Context, tokenString string) (interfac
 	})
 
 	if err != nil {
-		log.Fatal().Ctx(ctx).Err(err).Msg("Failed to parse JWT token:")
+		log.Error().Ctx(ctx).Err(err).Msg("Failed to parse JWT token:")
 		return nil, err
 	}
 
