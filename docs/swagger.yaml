@@ -1,0 +1,58 @@
+info:
+  contact: {}
+paths:
+  /v1/public/login:
+    post:
+      consumes:
+      - application/json
+      description: Login a new session
+      parameters:
+      - description: CreateUserRequest
+        in: body
+        name: dto.CreateUserRequest
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login a new user
+      tags:
+      - auth
+  /v1/public/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user and return a token
+      parameters:
+      - description: CreateUserRequest
+        in: body
+        name: dto.CreateUserRequest
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+swagger: "2.0"

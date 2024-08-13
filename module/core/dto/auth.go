@@ -1,5 +1,10 @@
 package dto
 
+
+type LoginRequest struct {
+	Phone string `json:"phone"`
+}
+
 type CreateUserRequest struct {
 	Phone string `json:"phone"`
 	Email string `json:"email"`

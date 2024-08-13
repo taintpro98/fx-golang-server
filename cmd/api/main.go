@@ -18,8 +18,12 @@ import (
 	"net/http"
 	"time"
 
+	_ "fx-golang-server/docs" // Import generated docs
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/fx"
 )
 
@@ -51,6 +55,9 @@ func NewGinEngine(trpt *transport.Transport, jwtMaker token.IJWTMaker) *gin.Engi
 	engine.Use(
 		middleware.LogRequestInfo(),
 	)
+
+	// Register the Swagger handler
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	route.RegisterHealthCheckRoute(engine)
 	route.RegisterRoutes(engine, trpt, jwtMaker)

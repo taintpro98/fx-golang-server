@@ -2,6 +2,24 @@
 ```bash
 go mod init fx-golang-server
 ```
+
+## Swagger
+```bash
+# Install
+go install github.com/swaggo/swag/cmd/swag@latest
+go get -u github.com/swaggo/gin-swagger
+go get -u github.com/swaggo/files
+
+# Add swag to PATH
+export PATH=$PATH:$(go env GOPATH)/bin
+source ~/.zshrc
+# or
+source ~/.bash_profile
+
+# use swag
+swag init -g cmd/api/main.go --output docs
+```
+
 ## Containerization
 
 ```bash

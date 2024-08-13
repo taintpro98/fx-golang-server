@@ -28,7 +28,3 @@ func HandleHealthCheck(ctx *gin.Context) {
 		nil,
 	)
 }
-
-func (t *Transport) Login(ctx *gin.Context) {
-
-}

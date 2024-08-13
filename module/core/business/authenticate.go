@@ -5,6 +5,7 @@ import (
 	"fx-golang-server/module/core/dto"
 	"fx-golang-server/module/core/model"
 	"fx-golang-server/module/core/repository"
+	"fx-golang-server/pkg/e"
 	"fx-golang-server/token"
 
 	"github.com/rs/zerolog/log"
@@ -12,6 +13,7 @@ import (
 
 type IAuthenticateBiz interface {
 	Register(ctx context.Context, data dto.CreateUserRequest) (dto.CreateUserResponse, error)
+	Login(ctx context.Context, data dto.LoginRequest) (dto.CreateUserResponse, error)
 }
 
 type authenticateBiz struct {
@@ -23,14 +25,14 @@ func NewAuthenticateBiz(
 	jwtMaker token.IJWTMaker,
 	userRepo repository.IUserRepository,
 ) IAuthenticateBiz {
-	return authenticateBiz{
+	return &authenticateBiz{
 		jwtMaker: jwtMaker,
 		userRepo: userRepo,
 	}
 }
 
-func (t authenticateBiz) Register(ctx context.Context, data dto.CreateUserRequest) (dto.CreateUserResponse, error) {
-	log.Info().Ctx(ctx).Msg("authenticateBiz Register")
+func (t *authenticateBiz) Register(ctx context.Context, data dto.CreateUserRequest) (dto.CreateUserResponse, error) {
+	log.Info().Ctx(ctx).Interface("data", data).Msg("authenticateBiz Register")
 	var response dto.CreateUserResponse
 	dataInsert := model.UserModel{
 		Phone: &data.Phone,
@@ -43,6 +45,28 @@ func (t authenticateBiz) Register(ctx context.Context, data dto.CreateUserReques
 
 	tokenString, err := t.jwtMaker.CreateToken(ctx, dto.UserPayload{
 		Sub: dataInsert.ID,
+	})
+	if err != nil {
+		log.Error().Ctx(ctx).Err(err).Msg("create token error")
+		return response, err
+	}
+	response.Token = tokenString
+	return response, nil
+}
+
+func (b *authenticateBiz) Login(ctx context.Context, data dto.LoginRequest) (dto.CreateUserResponse, error) {
+	var response dto.CreateUserResponse
+	user, err := b.userRepo.FindOne(ctx, dto.FilterUser{
+		Phone: data.Phone,
+	})
+	if err != nil {
+		return response, err
+	}
+	if user.ID == "" {
+		return response, e.ErrDataNotFound("user")
+	}
+	tokenString, err := b.jwtMaker.CreateToken(ctx, dto.UserPayload{
+		Sub: user.ID,
 	})
 	if err != nil {
 		log.Error().Ctx(ctx).Err(err).Msg("create token error")
