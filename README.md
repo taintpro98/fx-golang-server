@@ -20,6 +20,29 @@ source ~/.bash_profile
 swag init -g cmd/api/main.go --output docs
 ```
 
+## Database
+```sql
+SELECT * FROM pg_stat_activity;
+SELECT * FROM pg_stat_database;
+
+SHOW shared_buffers;
+SHOW work_mem;
+
+SELECT
+  datname,
+  usename,
+  count(*) AS connections
+FROM
+  pg_stat_activity
+GROUP BY
+  datname, usename;
+ 
+SELECT count(*) FROM pg_stat_activity;
+SHOW max_connections;
+
+SHOW autovacuum;
+```
+
 ## Containerization
 
 ```bash
