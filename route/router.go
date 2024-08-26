@@ -25,5 +25,10 @@ func RegisterRoutes(
 		{
 			movieApi.GET("", trpt.ListMovies)
 		}
+
+		customerApi := publicApi.Group("/customer")
+		{
+			customerApi.GET("/profile", trpt.GetCustomerProfile)
+		}
 	}
 }

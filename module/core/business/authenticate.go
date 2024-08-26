@@ -7,7 +7,9 @@ import (
 	"fx-golang-server/module/core/repository"
 	"fx-golang-server/pkg/e"
 	"fx-golang-server/token"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/zerolog/log"
 )
 
@@ -43,9 +45,9 @@ func (t *authenticateBiz) Register(ctx context.Context, data dto.CreateUserReque
 		return response, err
 	}
 
-	tokenString, err := t.jwtMaker.CreateToken(ctx, dto.UserPayload{
-		Sub: dataInsert.ID,
-	})
+	tokenString, err := t.jwtMaker.CreateToken(ctx, jwt.MapClaims{
+		"sub": dataInsert.ID,
+	}, time.Hour)
 	if err != nil {
 		log.Error().Ctx(ctx).Err(err).Msg("create token error")
 		return response, err
@@ -65,9 +67,9 @@ func (b *authenticateBiz) Login(ctx context.Context, data dto.LoginRequest) (dto
 	if user.ID == "" {
 		return response, e.ErrDataNotFound("user")
 	}
-	tokenString, err := b.jwtMaker.CreateToken(ctx, dto.UserPayload{
-		Sub: user.ID,
-	})
+	tokenString, err := b.jwtMaker.CreateToken(ctx, jwt.MapClaims{
+		"sub": user.ID,
+	}, time.Hour)
 	if err != nil {
 		log.Error().Ctx(ctx).Err(err).Msg("create token error")
 		return response, err

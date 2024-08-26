@@ -7,13 +7,14 @@ import (
 	"fx-golang-server/module/core/dto"
 	"fx-golang-server/pkg/e"
 	"os"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/zerolog/log"
 )
 
 type IJWTMaker interface {
-	CreateToken(ctx context.Context, data interface{}) (string, error)
+	CreateToken(ctx context.Context, data jwt.MapClaims, expiration time.Duration) (string, error)
 	VerifyToken(ctx context.Context, token string) (interface{}, error)
 }
 
@@ -47,10 +48,11 @@ func NewJWTMaker(cfg *config.Config) (IJWTMaker, error) {
 	}, nil
 }
 
-// CreateToken implements IJWTMaker.
-func (j *jwtMaker) CreateToken(ctx context.Context, payload interface{}) (string, error) {
+func (j *jwtMaker) CreateToken(ctx context.Context, payload jwt.MapClaims, expiration time.Duration) (string, error) {
+	payload["exp"] = time.Now().Add(expiration).Unix()
+	payload["exp"] = 0
 	// Create a new JWT token
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, payload.(jwt.Claims))
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, payload)
 
 	// Sign the token with the RSA private key
 	signedToken, err := token.SignedString(j.privateKey)

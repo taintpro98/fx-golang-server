@@ -1,6 +1,5 @@
 package dto
 
-
 type LoginRequest struct {
 	Phone string `json:"phone"`
 }
@@ -16,7 +15,6 @@ type CreateUserResponse struct {
 
 type UserPayload struct {
 	Sub string `json:"sub"`
-	Exp int64  `json:"exp"` // seconds
 }
 
 func (uc UserPayload) Valid() error {
