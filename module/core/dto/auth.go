@@ -1,5 +1,11 @@
 package dto
 
+import (
+	"fx-golang-server/pkg/e"
+	"github.com/dgrijalva/jwt-go"
+	"time"
+)
+
 type LoginRequest struct {
 	Phone string `json:"phone"`
 }
@@ -14,9 +20,12 @@ type CreateUserResponse struct {
 }
 
 type UserPayload struct {
-	Sub string `json:"sub"`
+	jwt.StandardClaims
 }
 
-func (uc UserPayload) Valid() error {
+func (c UserPayload) Valid() error {
+	if c.ExpiresAt < time.Now().Unix() {
+		return e.ErrTokenExpired
+	}
 	return nil
 }

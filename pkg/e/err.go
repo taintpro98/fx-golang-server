@@ -22,12 +22,6 @@ var (
 		Code:           http.StatusServiceUnavailable,
 		Msg:            "External service is unavailable",
 	}
-	ErrUnauthorized = CustomErr{
-		HttpStatusCode: http.StatusUnauthorized,
-		Code:           http.StatusUnauthorized,
-		Msg:            "Unauthorized",
-		Language:       "unauthorized",
-	}
 	ErrTimeout = CustomErr{
 		HttpStatusCode: http.StatusRequestTimeout,
 		Code:           http.StatusRequestTimeout,

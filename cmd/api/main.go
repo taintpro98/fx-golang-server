@@ -49,6 +49,16 @@ var ConnectionModule = fx.Module(
 	fx.Invoke(handleConnection),
 )
 
+var BusinessModule = fx.Module(
+	"business",
+	fx.Provide(business.NewAuthenticateBiz, business.NewMovieBiz, business.NewCustomerBiz),
+)
+
+var RepositoryModule = fx.Module(
+	"repository",
+	fx.Provide(repository.NewUserRepository, repository.NewMovieRepository),
+)
+
 func NewGinEngine(trpt *transport.Transport, jwtMaker token.IJWTMaker) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
@@ -112,8 +122,8 @@ func main() {
 		),
 		ConnectionModule,
 		fx.Provide(token.NewJWTMaker),
-		repository.RepositoryModule,
-		business.BusinessModule,
+		RepositoryModule,
+		BusinessModule,
 		fx.Provide(transport.NewTransport),
 		fx.Provide(NewGinEngine),
 		fx.Invoke(startHttp),

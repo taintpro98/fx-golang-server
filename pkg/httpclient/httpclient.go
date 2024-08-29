@@ -25,22 +25,19 @@ type DoRequestParam struct {
 }
 
 type HttpClient struct {
-	Client *http.Client
-	Token  string
-	ApiKey string
+	Client  *http.Client
+	Headers map[string]string
 }
 
 func (c HttpClient) DoRequest(ctx context.Context, param DoRequestParam, output interface{}, backupOutput *string) error {
 	param.Request.Header.Add("Content-Type", "application/json")
-	if c.Token != "" {
-		param.Request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.Token))
-	}
-	if c.ApiKey != "" {
-		param.Request.Header.Add("apikey", c.ApiKey)
+	for key, value := range c.Headers {
+		param.Request.Header.Set(key, value)
 	}
 	for key, value := range param.Headers {
-		param.Request.Header.Add(key, value)
+		param.Request.Header.Set(key, value)
 	}
+	
 	requestID := ctx.Value(constants.TraceID)
 	if requestID != nil {
 		param.Request.Header.Add(constants.XRequestID, fmt.Sprintf("%s", requestID))

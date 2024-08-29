@@ -35,9 +35,9 @@ func AuthMiddleware(jwtMaker token.IJWTMaker) gin.HandlerFunc {
 		}
 		payload, err := jwtMaker.VerifyToken(c, tokenString)
 		if err != nil {
-			dto.AbortJSON(c, e.ErrUnauthorized)
+			dto.AbortJSON(c, err)
 			return
 		}
-		c.Set(constants.XUserID, payload.(*dto.UserPayload).Sub)
+		c.Set(constants.XUserID, payload.Subject)
 	}
 }

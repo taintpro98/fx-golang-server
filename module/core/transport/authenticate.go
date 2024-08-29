@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary Register a new user
+// Register @Summary Register a new user
 // @Description Register a new user and return a token
 // @Tags auth
 // @Accept  json
@@ -25,7 +25,7 @@ func (t *Transport) Register(ctx *gin.Context) {
 	dto.HandleResponse(ctx, result, err)
 }
 
-// @Summary Login a new user
+// Login @Summary Login a new user
 // @Description Login a new session
 // @Tags auth
 // @Accept  json

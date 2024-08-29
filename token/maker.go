@@ -3,19 +3,18 @@ package token
 import (
 	"context"
 	"crypto/rsa"
+	"errors"
 	"fx-golang-server/config"
 	"fx-golang-server/module/core/dto"
 	"fx-golang-server/pkg/e"
-	"os"
-	"time"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/zerolog/log"
+	"os"
 )
 
 type IJWTMaker interface {
-	CreateToken(ctx context.Context, data jwt.MapClaims, expiration time.Duration) (string, error)
-	VerifyToken(ctx context.Context, token string) (interface{}, error)
+	CreateToken(ctx context.Context, data dto.UserPayload) (string, error)
+	VerifyToken(ctx context.Context, token string) (dto.UserPayload, error)
 }
 
 type jwtMaker struct {
@@ -48,9 +47,7 @@ func NewJWTMaker(cfg *config.Config) (IJWTMaker, error) {
 	}, nil
 }
 
-func (j *jwtMaker) CreateToken(ctx context.Context, payload jwt.MapClaims, expiration time.Duration) (string, error) {
-	payload["exp"] = time.Now().Add(expiration).Unix()
-	payload["exp"] = 0
+func (j *jwtMaker) CreateToken(ctx context.Context, payload dto.UserPayload) (string, error) {
 	// Create a new JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, payload)
 
@@ -63,8 +60,8 @@ func (j *jwtMaker) CreateToken(ctx context.Context, payload jwt.MapClaims, expir
 	return signedToken, nil
 }
 
-// VerifyToken implements IJWTMaker.
-func (j *jwtMaker) VerifyToken(ctx context.Context, tokenString string) (interface{}, error) {
+func (j *jwtMaker) VerifyToken(ctx context.Context, tokenString string) (dto.UserPayload, error) {
+	var result dto.UserPayload
 	// Parse the token
 	token, err := jwt.ParseWithClaims(tokenString, &dto.UserPayload{}, func(token *jwt.Token) (interface{}, error) {
 		return j.publicKey, nil
@@ -72,14 +69,18 @@ func (j *jwtMaker) VerifyToken(ctx context.Context, tokenString string) (interfa
 
 	if err != nil {
 		log.Error().Ctx(ctx).Err(err).Msg("Failed to parse JWT token:")
-		return nil, err
+		var ve *jwt.ValidationError
+		if errors.As(err, &ve) {
+			return result, ve.Inner
+		}
+		return result, err
 	}
 
 	// Validate the token
-	if claims, ok := token.Claims.(*dto.UserPayload); ok && token.Valid {
+	if claims, ok := token.Claims.(dto.UserPayload); ok && token.Valid {
 		return claims, nil
 	} else {
-		log.Info().Ctx(ctx).Msg("Token is invalid")
-		return nil, e.ErrUnauthorized
+		log.Error().Ctx(ctx).Msg("Token is invalid")
+		return result, e.ErrUnauthorized
 	}
 }
