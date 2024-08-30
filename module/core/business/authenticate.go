@@ -70,9 +70,11 @@ func (b *authenticateBiz) Login(ctx context.Context, data dto.LoginRequest) (dto
 		return response, e.ErrDataNotFound("user")
 	}
 	tokenString, err := b.jwtMaker.CreateToken(ctx, dto.UserPayload{
+		Email: *user.Email,
 		StandardClaims: jwt.StandardClaims{
 			Subject:   user.ID,
 			ExpiresAt: time.Now().Add(time.Hour).Unix(),
+			IssuedAt:  time.Now().Unix(),
 		},
 	})
 	if err != nil {

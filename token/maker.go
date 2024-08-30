@@ -14,7 +14,7 @@ import (
 
 type IJWTMaker interface {
 	CreateToken(ctx context.Context, data dto.UserPayload) (string, error)
-	VerifyToken(ctx context.Context, token string) (dto.UserPayload, error)
+	VerifyToken(ctx context.Context, tokenString string) (*dto.UserPayload, error)
 }
 
 type jwtMaker struct {
@@ -60,8 +60,7 @@ func (j *jwtMaker) CreateToken(ctx context.Context, payload dto.UserPayload) (st
 	return signedToken, nil
 }
 
-func (j *jwtMaker) VerifyToken(ctx context.Context, tokenString string) (dto.UserPayload, error) {
-	var result dto.UserPayload
+func (j *jwtMaker) VerifyToken(ctx context.Context, tokenString string) (*dto.UserPayload, error) {
 	// Parse the token
 	token, err := jwt.ParseWithClaims(tokenString, &dto.UserPayload{}, func(token *jwt.Token) (interface{}, error) {
 		return j.publicKey, nil
@@ -71,16 +70,16 @@ func (j *jwtMaker) VerifyToken(ctx context.Context, tokenString string) (dto.Use
 		log.Error().Ctx(ctx).Err(err).Msg("Failed to parse JWT token:")
 		var ve *jwt.ValidationError
 		if errors.As(err, &ve) {
-			return result, ve.Inner
+			return nil, ve.Inner
 		}
-		return result, err
+		return nil, err
 	}
 
 	// Validate the token
-	if claims, ok := token.Claims.(dto.UserPayload); ok && token.Valid {
+	if claims, ok := token.Claims.(*dto.UserPayload); ok && token.Valid {
 		return claims, nil
 	} else {
 		log.Error().Ctx(ctx).Msg("Token is invalid")
-		return result, e.ErrUnauthorized
+		return nil, e.ErrUnauthorized
 	}
 }

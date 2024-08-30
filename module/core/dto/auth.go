@@ -16,10 +16,12 @@ type CreateUserRequest struct {
 }
 
 type CreateUserResponse struct {
-	Token string `json:"token"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type UserPayload struct {
+	Email string `json:"email"`
 	jwt.StandardClaims
 }
 
