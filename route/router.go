@@ -18,6 +18,7 @@ func RegisterRoutes(
 	publicApi := v1Api.Group("/public")
 	publicApi.POST("/register", trpt.Register)
 	publicApi.POST("/login", trpt.Login)
+	publicApi.POST("/refresh", trpt.Refresh)
 
 	publicApi.Use(middleware.AuthMiddleware(jwtMaker))
 	{

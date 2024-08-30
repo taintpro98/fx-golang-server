@@ -43,3 +43,13 @@ func (t *Transport) Login(ctx *gin.Context) {
 	result, err := t.authBiz.Login(ctx, data)
 	dto.HandleResponse(ctx, result, err)
 }
+
+func (t *Transport) Refresh(ctx *gin.Context) {
+	var data dto.RefreshRequest
+	if err := ctx.ShouldBindJSON(&data); err != nil {
+		dto.HandleResponse(ctx, data, err)
+		return
+	}
+	result, err := t.authBiz.Refresh(ctx, data)
+	dto.HandleResponse(ctx, result, err)
+}

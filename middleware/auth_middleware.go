@@ -38,6 +38,10 @@ func AuthMiddleware(jwtMaker token.IJWTMaker) gin.HandlerFunc {
 			dto.AbortJSON(c, err)
 			return
 		}
+		if payload.Refresh {
+			dto.AbortJSON(c, e.ErrUnauthorized)
+			return
+		}
 		c.Set(constants.XUserID, payload.Subject)
 	}
 }

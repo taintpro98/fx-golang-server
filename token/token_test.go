@@ -8,11 +8,11 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-type Payload struct {
+type TestPayload struct {
 	UserID string `json:"user_id"`
 }
 
-func (uc Payload) Valid() error {
+func (uc TestPayload) Valid() error {
 	return nil
 }
 
@@ -48,7 +48,7 @@ func VerifyToken(tokenString string) interface{} {
 	}
 
 	// Parse the token
-	token, err := jwt.ParseWithClaims(tokenString, &Payload{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &TestPayload{}, func(token *jwt.Token) (interface{}, error) {
 		return pubKey, nil
 	})
 
@@ -58,7 +58,7 @@ func VerifyToken(tokenString string) interface{} {
 	}
 
 	// Validate the token
-	if claims, ok := token.Claims.(*Payload); ok && token.Valid {
+	if claims, ok := token.Claims.(*TestPayload); ok && token.Valid {
 		fmt.Println("Token is valid")
 		fmt.Println("User ID:", claims.UserID)
 		return claims
@@ -69,7 +69,7 @@ func VerifyToken(tokenString string) interface{} {
 }
 
 func TestToken(t *testing.T) {
-	payload := Payload{
+	payload := TestPayload{
 		UserID: "abc",
 	}
 	signedToken := CreateToken(payload)

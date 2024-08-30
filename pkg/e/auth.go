@@ -15,4 +15,10 @@ var (
 		Msg:            "Token is expired",
 		Language:       "token_expired",
 	}
+	ErrInvalidRefreshToken = CustomErr{
+		HttpStatusCode: http.StatusUnauthorized,
+		Code:           http.StatusUnauthorized,
+		Msg:            "Refresh token is invalid",
+		Language:       "refresh_token_is_invalid",
+	}
 )

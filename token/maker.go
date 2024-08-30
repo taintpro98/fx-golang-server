@@ -5,16 +5,18 @@ import (
 	"crypto/rsa"
 	"errors"
 	"fx-golang-server/config"
-	"fx-golang-server/module/core/dto"
 	"fx-golang-server/pkg/e"
+	"os"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/rs/zerolog/log"
-	"os"
 )
 
 type IJWTMaker interface {
-	CreateToken(ctx context.Context, data dto.UserPayload) (string, error)
-	VerifyToken(ctx context.Context, tokenString string) (*dto.UserPayload, error)
+	CreateToken(ctx context.Context, data *Payload) (string, error)
+	CreateTokenPair(ctx context.Context, data *Payload) (string, string, error)
+	VerifyToken(ctx context.Context, tokenString string) (*Payload, error)
 }
 
 type jwtMaker struct {
@@ -47,7 +49,11 @@ func NewJWTMaker(cfg *config.Config) (IJWTMaker, error) {
 	}, nil
 }
 
-func (j *jwtMaker) CreateToken(ctx context.Context, payload dto.UserPayload) (string, error) {
+func (j *jwtMaker) getTokenDuration() (time.Duration, time.Duration) {
+	return time.Hour, 24 * time.Hour
+}
+
+func (j *jwtMaker) CreateToken(ctx context.Context, payload *Payload) (string, error) {
 	// Create a new JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, payload)
 
@@ -60,9 +66,36 @@ func (j *jwtMaker) CreateToken(ctx context.Context, payload dto.UserPayload) (st
 	return signedToken, nil
 }
 
-func (j *jwtMaker) VerifyToken(ctx context.Context, tokenString string) (*dto.UserPayload, error) {
+func (j *jwtMaker) CreateTokenPair(ctx context.Context, payload *Payload) (string, string, error) {
+	accessDuration, refreshDuration := j.getTokenDuration()
+
+	// Generate access token
+	accessPayload := payload
+	accessPayload.SetExpires(accessDuration)
+	accessPayload.SetRefresh(nil, false)
+
+	jwtAccessToken := jwt.NewWithClaims(jwt.SigningMethodRS256, accessPayload)
+	token, err := jwtAccessToken.SignedString(j.privateKey)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Generate refresh token
+	refreshPayload := payload
+	refreshPayload.SetExpires(refreshDuration)
+	refreshPayload.SetRefresh(&accessPayload.Id, true)
+
+	jwtRefreshToken := jwt.NewWithClaims(jwt.SigningMethodRS256, refreshPayload)
+	refreshToken, err := jwtRefreshToken.SignedString(j.privateKey)
+	if err != nil {
+		return "", "", err
+	}
+	return token, refreshToken, nil
+}
+
+func (j *jwtMaker) VerifyToken(ctx context.Context, tokenString string) (*Payload, error) {
 	// Parse the token
-	token, err := jwt.ParseWithClaims(tokenString, &dto.UserPayload{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Payload{}, func(token *jwt.Token) (interface{}, error) {
 		return j.publicKey, nil
 	})
 
@@ -76,7 +109,7 @@ func (j *jwtMaker) VerifyToken(ctx context.Context, tokenString string) (*dto.Us
 	}
 
 	// Validate the token
-	if claims, ok := token.Claims.(*dto.UserPayload); ok && token.Valid {
+	if claims, ok := token.Claims.(*Payload); ok && token.Valid {
 		return claims, nil
 	} else {
 		log.Error().Ctx(ctx).Msg("Token is invalid")

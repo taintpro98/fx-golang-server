@@ -2,9 +2,14 @@ package dto
 
 import (
 	"fx-golang-server/pkg/e"
-	"github.com/dgrijalva/jwt-go"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
+
+type RefreshRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
 
 type LoginRequest struct {
 	Phone string `json:"phone"`
