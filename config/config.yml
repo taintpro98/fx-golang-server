@@ -5,6 +5,9 @@ app_info:
   api_port: :8080
   websocket_port: :8081
 
+blockchain:
+  url: https://eth-sepolia.public.blastapi.io
+
 database:
   schema: public
   host: localhost

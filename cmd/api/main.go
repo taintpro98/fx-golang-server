@@ -6,17 +6,20 @@ import (
 	"fmt"
 	"fx-golang-server/config"
 	"fx-golang-server/middleware"
+	"fx-golang-server/module/blockchain"
 	"fx-golang-server/module/core/business"
 	"fx-golang-server/module/core/repository"
 	"fx-golang-server/module/core/transport"
+	"fx-golang-server/module/telebot"
 	"fx-golang-server/pkg/cache"
 	"fx-golang-server/pkg/database"
-	"fx-golang-server/pkg/telegram"
 	"fx-golang-server/pkg/tracing"
 	"fx-golang-server/route"
 	"fx-golang-server/token"
 	"net/http"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	_ "fx-golang-server/docs" // Import generated docs
 
@@ -44,14 +47,27 @@ var ConnectionModule = fx.Module(
 	fx.Provide(
 		database.PostgresqlDatabaseProvider,
 		cache.RedisClientProvider,
-		telegram.TelegramBotProvider,
+		func(cnf *config.Config) (*tgbotapi.BotAPI, error) {
+			bot, err := tgbotapi.NewBotAPI(cnf.TelegramBot.Token)
+			if err != nil {
+				log.Error().Err(err).Msg("init telegram bot error")
+				return nil, err
+			}
+			bot.Debug = cnf.TelegramBot.Debug
+			return bot, nil
+		},
 	),
 	fx.Invoke(handleConnection),
 )
 
 var BusinessModule = fx.Module(
 	"business",
-	fx.Provide(business.NewAuthenticateBiz, business.NewMovieBiz, business.NewCustomerBiz),
+	fx.Provide(
+		business.NewAuthenticateBiz, 
+		business.NewMovieBiz, 
+		business.NewCustomerBiz,
+		telebot.NewTelegramClient,
+	),
 )
 
 var RepositoryModule = fx.Module(
@@ -74,7 +90,7 @@ func NewGinEngine(trpt *transport.Transport, jwtMaker token.IJWTMaker) *gin.Engi
 	return engine
 }
 
-func startHttp(lc fx.Lifecycle, cnf *config.Config, engine *gin.Engine, telegramBot telegram.ITelegramBot) {
+func startHttp(lc fx.Lifecycle, cnf *config.Config, engine *gin.Engine, telegramClient *telebot.TelegramClient) {
 	server := http.Server{
 		Addr:    cnf.AppInfo.ApiPort,
 		Handler: engine,
@@ -82,8 +98,8 @@ func startHttp(lc fx.Lifecycle, cnf *config.Config, engine *gin.Engine, telegram
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			if telegramBot != nil {
-				go telegramBot.GetMessages(ctx)
+			if telegramClient != nil {
+				go telegramClient.Handle(ctx)
 			}
 
 			go func() {
@@ -122,6 +138,7 @@ func main() {
 		),
 		ConnectionModule,
 		fx.Provide(token.NewJWTMaker),
+		fx.Provide(blockchain.NewEthClient),
 		RepositoryModule,
 		BusinessModule,
 		fx.Provide(transport.NewTransport),

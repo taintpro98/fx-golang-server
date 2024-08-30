@@ -22,6 +22,7 @@ const KEY_CONFIG_URL = "--config_url"
 type Config struct {
 	AppInfo     ConfigAppInfo    `mapstructure:"app_info"`
 	DBM         DatabaseConfig   `mapstructure:"dbm"`
+	Blockchain  BlockchainConfig `mapstructure:"blockchain"`
 	Database    DatabaseConfig   `mapstructure:"database"`
 	Mongo       MongoConfig      `mapstructure:"mongo"`
 	Redis       RedisConfig      `mapstructure:"redis"`
@@ -31,6 +32,10 @@ type Config struct {
 	TelegramBot TelegramBot      `mapstructure:"telegram_bot"`
 	Token       Token            `mapstructure:"token"`
 	Elastic     ElasticConfig    `mapstructure:"elastic"`
+}
+
+type BlockchainConfig struct {
+	Url string `mapstructure:"url"`
 }
 
 type KafkaConfig struct {
@@ -91,6 +96,7 @@ type MongoConfig struct {
 type TelegramBot struct {
 	ChatID int64  `mapstructure:"chat_id"`
 	Token  string `mapstructure:"token"`
+	Debug  bool   `mapstructure:"debug"`
 }
 
 type Token struct {
