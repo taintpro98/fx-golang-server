@@ -16,3 +16,6 @@ database:
 telegram_bot:
   token: abc
   chat_id: 123
+
+blockchain:
+  url: https://eth-sepolia.public.blastapi.io
