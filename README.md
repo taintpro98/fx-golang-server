@@ -3,6 +3,55 @@
 go mod init fx-golang-server
 ```
 
+## Docker
+- Remove containers not in the file docker-compose.dev.yml
+  ```
+  docker-compose -f docker-compose.dev.yml up --build -d --remove-orphans 
+  ```
+- Run kafka containers
+  ```
+  docker-compose -f docker-compose.kafka.yml up --build -d
+  ```
+- Run elastic containers
+  ```
+  docker-compose -f docker-compose.elastic.yml up --build -d
+  ```
+
+### Elastic search
+- [Dashboard](http://localhost:5601/)
+```
+{
+  "query": {
+    "match_all": {}
+  }
+}
+{
+  "query": {
+    "wildcard": {
+      "phone": "*191954*"
+    }
+  }
+}
+{
+    "query": {
+        "bool": {
+            "should": [
+                {
+                    "wildcard": {
+                        "phone": "*191*"
+                    }
+                },
+                {
+                    "wildcard": {
+                        "email": "*191*"
+                    }
+                }
+            ]
+        }
+    }
+}
+```
+
 ## Swagger
 ```bash
 # Install

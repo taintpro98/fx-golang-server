@@ -3,13 +3,12 @@ package model
 import "time"
 
 type UserModel struct {
-	ID            string     `json:"id" gorm:"column:id;default:uuid_generate_v4()"`
-	LoyaltyID     *int64     `json:"loyalty_id,omitempty" gorm:"column:loyalty_id"`
-	Phone         *string    `json:"phone,omitempty" gorm:"column:phone"`
-	Email         *string    `json:"email,omitempty" gorm:"column:email"`
-	CurOriginalID *string    `json:"cur_original_id,omitempty" gorm:"column:cur_original_id"`
-	CreatedAt     *time.Time `json:"created_at,omitempty" gorm:"column:created_at"`
-	UpdatedAt     *time.Time `json:"updated_at,omitempty" gorm:"column:updated_at"`
+	ID        string     `json:"id" gorm:"column:id;default:uuid_generate_v4()"`
+	Name      string     `json:"name" gorm:"column:name"`
+	Phone     *string    `json:"phone,omitempty" gorm:"column:phone"`
+	Email     *string    `json:"email,omitempty" gorm:"column:email"`
+	CreatedAt *time.Time `json:"created_at,omitempty" gorm:"column:created_at"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty" gorm:"column:updated_at"`
 }
 
 func (UserModel) TableName() string {

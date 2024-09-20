@@ -6,3 +6,11 @@ type FilterUser struct {
 	ID           string
 	CommonFilter CommonFilter
 }
+
+type SearchUsersRequest struct {
+	Search string `json:"search"`
+}
+
+type SearchUsersResponse struct {
+	
+}

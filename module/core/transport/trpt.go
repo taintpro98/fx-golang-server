@@ -8,20 +8,23 @@ import (
 )
 
 type Transport struct {
-	authBiz  business.IAuthenticateBiz
-	movieBiz business.IMovieBiz
+	authBiz     business.IAuthenticateBiz
+	movieBiz    business.IMovieBiz
 	customerBiz business.ICustomerBiz
+	elasticBiz  business.IElasticBiz
 }
 
 func NewTransport(
 	authBiz business.IAuthenticateBiz,
 	movieBiz business.IMovieBiz,
 	customerBiz business.ICustomerBiz,
+	elasticBiz business.IElasticBiz,
 ) *Transport {
 	return &Transport{
-		authBiz:  authBiz,
-		movieBiz: movieBiz,
+		authBiz:     authBiz,
+		movieBiz:    movieBiz,
 		customerBiz: customerBiz,
+		elasticBiz:  elasticBiz,
 	}
 }
 

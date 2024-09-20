@@ -9,10 +9,12 @@ import (
 	"fx-golang-server/module/blockchain"
 	"fx-golang-server/module/core/business"
 	"fx-golang-server/module/core/repository"
+	"fx-golang-server/module/core/storage"
 	"fx-golang-server/module/core/transport"
 	"fx-golang-server/module/telebot"
 	"fx-golang-server/pkg/cache"
 	"fx-golang-server/pkg/database"
+	"fx-golang-server/pkg/elastic"
 	"fx-golang-server/pkg/tracing"
 	"fx-golang-server/route"
 	"fx-golang-server/token"
@@ -45,6 +47,7 @@ func handleConnection(lc fx.Lifecycle, redisClient cache.IRedisClient) {
 var ConnectionModule = fx.Module(
 	"connection",
 	fx.Provide(
+		elastic.ESProvider,
 		database.PostgresqlDatabaseProvider,
 		cache.RedisClientProvider,
 		func(cnf *config.Config) (*tgbotapi.BotAPI, error) {
@@ -60,6 +63,16 @@ var ConnectionModule = fx.Module(
 	fx.Invoke(handleConnection),
 )
 
+var RepositoryModule = fx.Module(
+	"repository",
+	fx.Provide(repository.NewUserRepository, repository.NewMovieRepository),
+)
+
+var StorageModule = fx.Module(
+	"storage",
+	fx.Provide(storage.NewElasticStorage),
+)
+
 var BusinessModule = fx.Module(
 	"business",
 	fx.Provide(
@@ -68,11 +81,6 @@ var BusinessModule = fx.Module(
 		business.NewCustomerBiz,
 		telebot.NewTelegramClient,
 	),
-)
-
-var RepositoryModule = fx.Module(
-	"repository",
-	fx.Provide(repository.NewUserRepository, repository.NewMovieRepository),
 )
 
 func NewGinEngine(trpt *transport.Transport, jwtMaker token.IJWTMaker) *gin.Engine {
@@ -139,6 +147,7 @@ func main() {
 		ConnectionModule,
 		fx.Provide(token.NewJWTMaker),
 		fx.Provide(blockchain.NewEthClient),
+		StorageModule,
 		RepositoryModule,
 		BusinessModule,
 		fx.Provide(transport.NewTransport),
