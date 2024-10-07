@@ -21,6 +21,7 @@ swag init -g cmd/api/main.go --output docs
 ```
 
 ## Database
+### Helpful queries
 ```sql
 SELECT * FROM pg_stat_activity;
 SELECT * FROM pg_stat_database;
@@ -41,6 +42,17 @@ SELECT count(*) FROM pg_stat_activity;
 SHOW max_connections;
 
 SHOW autovacuum;
+```
+
+### Migrations
+```sql
+go run ./cmd/migration/main.go -dir migrations create ${FILE_NAME} sql
+go run ./cmd/migration/main.go -dir migrations up
+```
+### Seeds
+```sql
+go run ./cmd/migration/main.go -dir seeds create ${FILE_NAME} sql
+go run ./cmd/migration/main.go -dir seeds up
 ```
 
 ## Containerization
