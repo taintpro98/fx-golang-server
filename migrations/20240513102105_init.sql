@@ -22,89 +22,14 @@ create table public.users (
     "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS public.rooms;
+DROP TABLE IF EXISTS public.feeds;
 
-create table public.rooms(
+CREATE TABLE public.feeds (
     id bigserial primary key,
-    "name" varchar not null,
-    "created_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-DROP TABLE IF EXISTS public.seats;
-
-create table public.seats(
-    id uuid DEFAULT uuid_generate_v4() primary key,
-    seat_code varchar not null,
-    room_id integer not null,
-    seat_type varchar not null,
-    seat_order integer not null,
-    "created_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-DROP TABLE IF EXISTS public.movies;
-
-create table public.movies(
-    id uuid DEFAULT uuid_generate_v4() primary key,
-    title varchar not null,
-    content text null,
-    videos jsonb null,
-    "created_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-DROP TABLE IF EXISTS public.slots;
-
-create table public.slots(
-    id uuid DEFAULT uuid_generate_v4() primary key,
-    room_id integer not null,
-    movie_id uuid not null,
-    start_time timestamp not null,
-    end_time timestamp null,
-    "created_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-DROP TABLE IF EXISTS public.orders;
-
-create table public.orders (
-    id varchar(30) not null primary key,
-    user_id uuid not null,
-    slot_id uuid not null,
-    "created_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-DROP TABLE IF EXISTS public.slot_seats;
-
-create table public.slot_seats(
-    id uuid DEFAULT uuid_generate_v4() primary key,
-    seat_id uuid not null,
-    slot_id uuid not null,
-    order_id varchar null,
-    total_pay float null,
-    "status" varchar not null,
-    "created_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-DROP TABLE IF EXISTS public.posts;
-
-CREATE TABLE public.posts (
-    id uuid DEFAULT uuid_generate_v4() primary key,
-    title text not null,
-    content text not null,
     user_id uuid not null,
     "created_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" timestamp NULL DEFAULT CURRENT_TIMESTAMP
+    "deleted_at" timestamp NULL DEFAULT
 );
 
 CREATE UNIQUE INDEX slot_seats_slot_id_seat_id_u_idx ON public.slot_seats(slot_id, seat_id);
